@@ -34,7 +34,7 @@ Shader "Custom/Diffuse" {
                 f.pos = UnityObjectToClipPos(v.pos);//将顶点坐标由模型空间变换到裁剪空间
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;//获取环境光的颜色
                 fixed3 worldLight = normalize(_WorldSpaceLightPos0.xyz);//计算光源方向
-                fixed3 worldNormal = normalize(mul(v.normal, (float3x3)unity_WorldToObject));//计算顶点法线在世界空间下的方向
+                fixed3 worldNormal = normalize(mul(v.normal, (float3x3)unity_WorldToObject));//计算顶点法线在世界空间下的方向y
                 fixed3 diffuse = _LightColor0.rgb * _Diffuse * saturate(dot(worldLight, worldNormal));//计算漫反射部分的颜色
                 f.color = ambient + diffuse;//顶点颜色 = 环境光颜色 + 漫反射颜色
 
