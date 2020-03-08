@@ -8,26 +8,20 @@
 
 // Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
 
-Shader "Custom/ForwardRendering"
-{
-    Properties
-    {
-        _Diffuse("Diffuse", Color) = (1, 1, 1, 1)
-        _Specular("Specular", Color) = (1, 1, 1, 1)
-        _Gloss("Gloss", Range(8.0, 256)) = 20
-    }
-    	SubShader {
+Shader "Custom/ForwardRendering" {
+	Properties {
+		_Diffuse ("Diffuse", Color) = (1, 1, 1, 1)
+		_Specular ("Specular", Color) = (1, 1, 1, 1)
+		_Gloss ("Gloss", Range(8.0, 256)) = 20
+	}
+	SubShader {
 		Tags { "RenderType"="Opaque" }
 		
 		Pass {
-			// Pass for ambient light & first pixel light (directional light)
 			Tags { "LightMode"="ForwardBase" }
 		
 			CGPROGRAM
-			
-			// Apparently need to add this declaration 
 			#pragma multi_compile_fwdbase	
-			
 			#pragma vertex vert
 			#pragma fragment frag
 			
@@ -50,6 +44,7 @@ Shader "Custom/ForwardRendering"
 			
 			v2f vert(a2v v) {
 				v2f o;
+				
 				o.pos = UnityObjectToClipPos(v.vertex);
 				
 				o.worldNormal = UnityObjectToWorldNormal(v.normal);
@@ -78,22 +73,16 @@ Shader "Custom/ForwardRendering"
 			
 			ENDCG
 		}
-
-
-        	Pass {
-			// Pass for other pixel lights
+		
+		Pass {
 			Tags { "LightMode"="ForwardAdd" }
 			
 			Blend One One
-		
 			CGPROGRAM
 			
-			// Apparently need to add this declaration
 			#pragma multi_compile_fwdadd
-			
 			#pragma vertex vert
 			#pragma fragment frag
-			
 			#include "Lighting.cginc"
 			#include "AutoLight.cginc"
 			
