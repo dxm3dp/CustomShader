@@ -1,4 +1,5 @@
-﻿Shader "Custom/Chapter6-DiffuseVertexLevel"
+﻿// 2020.3.初 3.21(6)
+Shader "Custom/Chapter6-DiffuseVertexLevel"
 {
     Properties
     {

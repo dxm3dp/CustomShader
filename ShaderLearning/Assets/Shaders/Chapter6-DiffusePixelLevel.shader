@@ -1,4 +1,5 @@
-﻿Shader "Custom/Chapter6-DiffusePixelLevel"
+﻿// 2020.3.初 3.21(6)
+Shader "Custom/Chapter6-DiffusePixelLevel"
 {
     Properties
     {
@@ -26,6 +27,7 @@
 
             struct v2f {
                 float4 pos : SV_POSITION;
+                // 世界空间下的顶点法线
                 float3 worldNormal : TEXCOORD0;
             };
 
@@ -52,6 +54,7 @@
 
                 return fixed4(color, 1.0);
             }
+
             ENDCG
         }
     }

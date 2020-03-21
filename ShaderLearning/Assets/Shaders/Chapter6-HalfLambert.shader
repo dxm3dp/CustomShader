@@ -1,4 +1,4 @@
-﻿// 2020.3.12(4)
+﻿// 2020.3.12(4) 3.21(6)
 // 半兰伯特光照模型
 Shader "Custom/Chapter6-HalfLambert"
 {
@@ -51,6 +51,7 @@ Shader "Custom/Chapter6-HalfLambert"
 
                 fixed3 worldNormal = normalize(i.worldNormal);
                 fixed3 worldLightDir = normalize(_WorldSpaceLightPos0.xyz);
+                // 将世界空间下的顶点法线与光照方向的余弦值由[-1, 1]映射到 [0, 1], 以此来增强光照效果
                 fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * (dot(worldNormal, worldLightDir) * 0.5 + 0.5);
 
                 fixed3 color = ambient + diffuse;

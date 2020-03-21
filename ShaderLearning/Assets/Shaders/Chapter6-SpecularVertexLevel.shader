@@ -1,5 +1,6 @@
 ﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
+// 2020.3.13(5) 3.21(6)
 Shader "Custom/Chapter6-SpecularVertexLevel"
 {
     Properties
@@ -50,9 +51,9 @@ Shader "Custom/Chapter6-SpecularVertexLevel"
                 fixed3 worldLightDir = normalize(_WorldSpaceLightPos0.xyz);
                 // 计算漫反射分量
                 fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * saturate(dot(worldNormal, worldLightDir));
-                // 计算反射方向向量
+                // 计算反射方向向量, 注意光照方向向量前面的负号, 因为reflect函数要求是由光源指向顶点
                 fixed3 reflectDir = normalize(reflect(-worldLightDir, worldNormal));
-                // 计算视角方向
+                // 计算视角方向, 在世界空间下
                 fixed3 viewDir = normalize(_WorldSpaceCameraPos.xyz - mul(unity_ObjectToWorld, v.vertex).xyz);
                 // 计算高光反射分量
                 fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(reflectDir, viewDir)), _Gloss);
