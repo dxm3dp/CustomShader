@@ -35,8 +35,50 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
 
             struct a2v
             {
-                
+                float4 vertex : POSITION;
+                float3 normal : NORMAL;
+                // TANGENT语义告诉Unity把顶点的切线方向填充到tangent变量中.
+                // 需要注意的是,tangent的类型是float4, 而非float3,因为我们需要使用tangent.w分量
+                // 来决定切线空间中的第三个坐标轴--副切线的方向性.
+                float4 tangent : TANGENT;
+                float4 texcoord : TEXCOORD0;
             };
+
+            struct v2f
+            {
+                float4 pos : SV_POSITION;
+                // uv坐标
+                float4 uv : TEXCOORD0;
+                // 切线空间下的光照方向
+                float3 lightDir : TEXCOORD1;
+                // 切线空间下的视角方向
+                float3 viewDir : TEXCOORD2;
+            };
+
+            v2f vert(a2v v)
+            {
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.uv.xy = v.texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+                o.uv.zw = v.texcoord.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
+                // 
+                float3 binormal = cross(normalize(v.normal), normalize(v.tangent.xyz)) * v.tangent.w;
+                float3x3 rotation = float3x3(v.tangent.xyz, binormal, v.normal);
+                //
+                o.lightDir = mul(rotation, ObjSpaceLightDir(v.vertex)).xyz;
+                o.viewDir = mul(rotation, ObjSpaceViewDir(v.vertex)).xyz;
+
+                return o;
+            }
+
+            fixed4 frag(v2f i) : SV_TARGET
+            {
+                fixed3 tangentLightDir = normalize(i.lightDir);
+                fixed3 tangentViewDir = normalize(i.viewDir);
+
+                fixed4 packedNormal = tex2D(_BumpMap, i.uv.zw);
+                fixed3 tangentNormal;
+            }
             ENDCG
         }
     }
