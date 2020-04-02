@@ -1,4 +1,4 @@
-﻿// 2020.3.25(3)
+﻿// 2020.3.25(3) 4.2(4)
 
 Shader "Custom/Chapter7-NormalMapTangentSpace"
 {
@@ -13,7 +13,7 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
     }
     SubShader
     {
-        pass
+        Pass
         {
             Tags {"LightModel"="ForwardBase"}
 
@@ -61,10 +61,11 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv.xy = v.texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
                 o.uv.zw = v.texcoord.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
-                // 
+                // 计算副法线(副切线)
                 float3 binormal = cross(normalize(v.normal), normalize(v.tangent.xyz)) * v.tangent.w;
+                // 将模型空间下的切线方向,副切线方向,法线方向按行排列来得到从模型空间到切线空间的变换矩阵.
                 float3x3 rotation = float3x3(v.tangent.xyz, binormal, v.normal);
-                //
+                // 将模型空间下的光照方向和视角方向变换到切线空间中.
                 o.lightDir = mul(rotation, ObjSpaceLightDir(v.vertex)).xyz;
                 o.viewDir = mul(rotation, ObjSpaceViewDir(v.vertex)).xyz;
 
@@ -73,11 +74,24 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
 
             fixed4 frag(v2f i) : SV_TARGET
             {
+                // 切线空间下的光照方向
                 fixed3 tangentLightDir = normalize(i.lightDir);
+                // 切线空间下的视角方向
                 fixed3 tangentViewDir = normalize(i.viewDir);
 
+                // 对法线纹理进行采样
                 fixed4 packedNormal = tex2D(_BumpMap, i.uv.zw);
-                fixed3 tangentNormal;
+                fixed3 tangentNormal = UnpackNormal(packedNormal);
+                tangentNormal.xy *= _BumpScale;
+                tangentNormal.z = sqrt(1 - saturate(dot(tangentNormal.xy , tangentNormal.xy)));
+
+                fixed3 albedo = tex2D(_MainTex, i.uv).rgb * _Color.rgb;
+                fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
+                fixed3 diffuse = _LightColor0.rgb * albedo * saturate(dot(tangentLightDir, tangentNormal));
+                fixed3 halfDir = normalize(tangentLightDir + tangentViewDir);
+                fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(tangentNormal, halfDir)), _Gloss);
+
+                return fixed4(ambient + diffuse + specular , 1.0);
             }
             ENDCG
         }
