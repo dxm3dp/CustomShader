@@ -1,4 +1,4 @@
-﻿// 2020.3.25(3) 4.2(4)
+﻿// 2020.3.25(3) 4.2(4) 4.3(5)
 
 Shader "Custom/Chapter7-NormalMapTangentSpace"
 {
@@ -15,6 +15,7 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
     {
         Pass
         {
+            // 该Pass的光照模式
             Tags {"LightModel"="ForwardBase"}
 
             CGPROGRAM
@@ -25,10 +26,13 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
             #include "Lighting.cginc"
 
             fixed4 _Color;
+            // 漫反射纹理及其属性
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            // 法线纹理及其属性
             sampler2D _BumpMap;
             float4 _BumpMap_ST;
+            // 控制凹凸程度
             float _BumpScale;
             fixed4 _Specular;
             float _Gloss;
@@ -49,6 +53,7 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
                 float4 pos : SV_POSITION;
                 // uv坐标
                 float4 uv : TEXCOORD0;
+                // 需要在顶点着色器中计算切线空间下的光照和视角方向,因此添加存储光照和视角方向的变量:
                 // 切线空间下的光照方向
                 float3 lightDir : TEXCOORD1;
                 // 切线空间下的视角方向
@@ -85,7 +90,7 @@ Shader "Custom/Chapter7-NormalMapTangentSpace"
                 tangentNormal.xy *= _BumpScale;
                 tangentNormal.z = sqrt(1 - saturate(dot(tangentNormal.xy , tangentNormal.xy)));
 
-                fixed3 albedo = tex2D(_MainTex, i.uv).rgb * _Color.rgb;
+                fixed3 albedo = tex2D(_MainTex, i.uv.xy).rgb * _Color.rgb;
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
                 fixed3 diffuse = _LightColor0.rgb * albedo * saturate(dot(tangentLightDir, tangentNormal));
                 fixed3 halfDir = normalize(tangentLightDir + tangentViewDir);
