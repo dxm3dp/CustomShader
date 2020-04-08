@@ -71,17 +71,33 @@ Shader "Custom/Chapter7-NormalMapWorldSpace"
 
             fixed4 frag(v2f i) : SV_TARGET
             {
+                // 组合世界空间下的顶点坐标
                 float3 worldPos = float3(i.TtoW0.w, i.TtoW1.w, i.TtoW2.w);
+                // 世界空间下的光照方向
                 fixed3 lightDir = normalize(UnityWorldSpaceLightDir(worldPos));
+                // 世界空间下的视角方向
                 fixed3 viewDir = normalize(UnityWorldSpaceViewDir(worldPos));
                 //
                 fixed3 bump = UnpackNormal(tex2D(_BumpMap, i.uv.zw));
                 bump.xy *= _BumpScale;
                 bump.z = sqrt(1 - saturate(dot(bump.xy, bump.xy)));
+                bump = normalize(half3(dot(i.TtoW0.xyz, bump), dot(i.TtoW1.xyz, bump), dot(i.TtoW2.xyz, bump)));
+
+                // 计算材质的反射率 albedo
+                fixed3 albedo = tex2D(_MainTex, i.uv.xy).rgb * _Color.rgb;
+                // 计算环境光分量
+                fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
+                // 计算漫反射分量
+                fixed3 diffuse = _LightColor0.rgb * albedo * saturate(dot(bump, lightDir));
+                // 计算高光反射分量
+                fixed3 halfDir = normalize(lightDir + viewDir);
+                fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(bump, halfDir)), _Gloss);
+
+                return fixed4(ambient + diffuse + specular, 1.0);
 
             }
-
             ENDCG
         }
-        FallBack "Diffuse"
     }
+    FallBack "Diffuse"
+}
