@@ -57,12 +57,18 @@ Shader "Custom/Chapter7-RampTexture"
             {
                 fixed3 worldNormal = normalize(i.worldNormal);
                 fixed3 worldLightDir = normalize(UnityWorldSpaceLightDir(i.worldPos));
-                // 
+                // 计算环境光分量
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+                // 计算漫反射分量
                 fixed halfLambert = 0.5 * dot(worldNormal, worldLightDir) + 0.5;
                 fixed3 diffuseColor = tex2D(_RampTex, fixed2(halfLambert, halfLambert)).rgb * _Color.rgb;
+                fixed3 diffuse = _LightColor0.rgb * diffuseColor;
+                // 计算高光反射分量
+                fixed3 viewDir = normalize(UnityWorldSpaceViewDir(i.worldPos));
+                fixed3 halfDir = normalize(worldLightDir + viewDir);
+                fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(worldNormal, halfDir)), _Gloss);
 
-                return fixed4(1.0, 1.0, 1.0, 1.0);
+                return fixed4(ambient + diffuse + specular, 1.0);
             }
             ENDCG
         }
