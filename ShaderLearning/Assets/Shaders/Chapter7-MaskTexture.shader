@@ -67,7 +67,26 @@
 
             fixed4 frag(v2f i) : SV_TARGET
             {
-                return fixed4(1.0, 1.0, 1.0, 1.0);
+                fixed3 tangentLightDir = normalize(i.lightDir);
+                fixed3 tangentViewDir = normalize(i.viewDir);
+                // 计算切线空间下的法线
+                fixed3 tangentNormal = UnpackNormal(tex2D(_BumpMap, i.uv));
+                tangentNormal.xy *= _BumpScale;
+                tangentNormal.z = sqrt(1 - saturate(dot(tangentNormal.xy, tangentNormal.xy)));
+                // 计算折射率
+                fixed3 albedo = tex2D(_MainTex, i.uv).rgb * _Color.rgb;
+                // 计算环境光分量
+                fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
+                // 计算漫反射光分量
+                fixed3 diffuse = _LightColor0.rgb * albedo * saturate(dot(tangentNormal, tangentLightDir));
+                // 计算遮罩纹理的纹素值 
+                fixed specularMask = tex2D(_SpecularMask, i.uv).r * _SpecularScale;
+                // 计算高光反射分量
+                fixed3 halfDir = normalize(tangentLightDir + tangentViewDir);
+                fixed3 specular = _LightColor0.rgb * _Specular.rgb * 
+                pow(saturate(dot(tangentNormal, halfDir)),_Gloss) * specularMask;
+
+                return fixed4(ambient + diffuse + specular, 1.0);
             }
             ENDCG
         }
