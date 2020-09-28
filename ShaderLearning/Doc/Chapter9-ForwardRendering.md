@@ -1,7 +1,5 @@
-﻿// Upgrade NOTE: replaced '_LightMatrix0' with 'unity_WorldToLight'
 
-// Upgrade NOTE: replaced '_LightMatrix0' with 'unity_WorldToLight'
-
+```glsl
 Shader "Custom/Chapter9-ForwardRendering"
 {
     Properties
@@ -169,3 +167,4 @@ Shader "Custom/Chapter9-ForwardRendering"
     }
     FallBack "Specular"
 }
+```
