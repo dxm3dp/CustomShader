@@ -86,22 +86,54 @@ float f = vector.y; // or .g,  f = 2
 
 A matrix is created by appending two sizes (integers between 1 and 4) to the scalar , separated by an "x" . The first integer is the number of **rows** , while the second is the number of **columns** in the matrix . For example :
 
-- float4x4 - 4 rows , 4 columns
-- int4x3 - 4 rows , 3 columns
-- half2*1 - 2 rows , 1 column
-- float1x4 - 1 row , 4 columns
+- `float4x4` - 4 rows , 4 columns
+- `int4x3` - 4 rows , 3 columns
+- `half2*1` - 2 rows , 1 column
+- `float1x4` - 1 row , 4 columns
 
 Matrix are used for transforming between different spaces . If you aren't very familiar with them , I'd recommend looking at [this tutorial by CatlikeCoding](https://catlikecoding.com/unity/tutorials/rendering/part-1/) .
 
 Unity has built-in transformation matrices which are used for transforming between common spaces , such as :
 
-- UNITY_MATRIX_M (or Unity_ObjectToWorld) - **Model** Matrix , Converts from Object space to World space .
-- UNITY_MATRIX_V - **View** Matrix , Converts from world space to View space
-- UNITY_MATRIX_P - **Projection** Matrix , Converts from View space to Clip space
-- UNITY_MATRIX_VP - **View Projection** Matrix , Converts from World space to Clip space .
+- `UNITY_MATRIX_M` (or `unity_ObjectToWorld`) - **Model** Matrix , Converts from Object space to World space .
+- `UNITY_MATRIX_V` - **View** Matrix , Converts from world space to View space
+- `UNITY_MATRIX_P` - **Projection** Matrix , Converts from View space to Clip space
+- `UNITY_MATRIX_VP` - **View Projection** Matrix , Converts from World space to Clip space .
 
 Also inverse versions :
 
+- `UNITY_MATRIX_I_M` (or `unity_WorldToObject`) - **Inverse Model** Matrix , Converts from World space to Object space
+- `UNITY_MATRIX_I_V` - **Inverse View** Matrix , Converts from View space to World space
+- `UNITY_MATRIX_I_P` - **Inverse Projection** Matrix , Converts from Clip space to View space
+- `UNITY_MATRIX_I_VP` - **Inverse View Projection** Matrix , Converts from Clip space to World space
 
+While you can use these matrices to convert between spaces via matrix multiplication (e.g. `mul(matrix, float4(position.xyz, 1))`) , there is also helper function in the SRP Core ShaderLibrary [SpaceTransforms.hlsl](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl) .
 
+Something to be aware of is when dealing with matrix multiplication , the order is important . Usually the matrix will be in the first input and the vector in the second . A Vector in the second input is treated like a Matrix consisting of up to 4 rows (depending on the size of the vector) , and a single column . A Vector in the first input is instead treated as a Matrix consisting of 1 row and up to 4 columns .
 
+Each component in the matrix can also be accessed using either of the following : The zero-based row-column position :
+
+- ._m00, ._m01, ._m02, ._m03
+- ._m10, ._m11, ._m12, ._m13
+- ._m20, ._m21, ._m22, ._m23
+- ._m30, ._m31, ._m32, ._m33
+
+The one-based row-column position:
+
+- ._m11, ._m12, ._m13, ._m14
+- ._m21, ._m22, ._m23, ._m24
+- ._m31, ._m32, ._m33, ._m34
+- ._m41, ._m42, ._m43, ._m44
+
+The zero-based array access notation:
+
+- [0][0], [0][1], [0][2], [0][3]
+- [1][0], [1][1], [1][2], [1][3]
+- [2][0], [2][1], [2][2], [2][3]
+- [3][0], [3][1], [3][2], [3][3]
+
+With the first two options , you can also use swizzling . e.g. `._m00_m11` or `._11_22` .
+
+Of note , `._m03_m13_m23` corresponds to the translation part of each matrix . So `UNITY_MATRIX_M._m03_m13_m23` gives you the World space postion of the origin of the GameObject , (assuming there is no static/dynamic batching involved for reasons explained in my [Intro to Shaders post](https://www.cyanilux.com/tutorials/intro-to-shaders/#material-instances) .
+
+### Texture Objects
