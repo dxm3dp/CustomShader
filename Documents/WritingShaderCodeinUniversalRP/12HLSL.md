@@ -137,3 +137,74 @@ With the first two options , you can also use swizzling . e.g. `._m00_m11` or `.
 Of note , `._m03_m13_m23` corresponds to the translation part of each matrix . So `UNITY_MATRIX_M._m03_m13_m23` gives you the World space postion of the origin of the GameObject , (assuming there is no static/dynamic batching involved for reasons explained in my [Intro to Shaders post](https://www.cyanilux.com/tutorials/intro-to-shaders/#material-instances) .
 
 ### Texture Objects
+
+Textures store a colour for each **texel** - basically the same as a pixel , but they are known as texels (short for texture elements) when referring to textures and they also aren't limited to just two demensions .
+
+The fragment shader stage runs on a per-fragment/pixel basis , where we can access the colour of a texel with a given coordinate . Textures can have different sizes (widths/heights/depth) , but the coordinate used to sample the texture is normalised to a 0-1 range . These are known as Texture Coordinates or UVs . (where U corresponds to the horizontal axis of the texture , while V is the vertical . Sometimes you'll see UVW where W is the third dimension / depth slice of the texture) .
+
+The most common texture is a 2D one , which can be defined in URP using the following macros in the global scope (outside any functions) :
+
+```shader
+TEXTURE2D(textureName);
+SAMPLE(sampler_textureName);
+```
+
+For each texture object we also define a [SampleState](https://docs.unity3d.com/Manual/SL-SamplerStates.html) which contains the wrap and filter modes from the texture's import settings . Alternatively , we can define an inline sampler , e.g. `SAMPLER(sampler_linear_repeat)` .
+
+#### Filter Modes
+
+- **Point** (or Nearest-Point) : The colour is taken from the nearest texel . The result is blocky/pixellated , but that if you're sampling pixel art you'll likely want to use this .
+- **Linear / Bilinear** : The colour is taken as a weighted average of close texels , based on the distance to them .
+- **Trilinear** : The same as Linear/Bilinear , but it is also blends between mipmap levels .
+
+#### Wrap Modes
+
+- **Repeat** : UV values outside of 0-1 will cause the texture to tile/repeat .
+- **Clamp** : UV values outside of 0-1 are clamped , causing the edges of the texture to stretch out .
+- **Mirror** : The texture tiles/repeats while also mirroring at each integer boundary .
+- **Mirror Once** : The texture is mirrored once , then clamps UV values lower than -1 and higher than 2 .
+
+Later in the fragment shader we use another macro to sample the Texture2D with a uv coordinate that would also be passed through from the vertex shader :
+
+```shader
+float4 color = SAMPLE_TEXTURE2D(textureName, sampler_textureName, uv);
+// Note, this can only be used in fragment as it calculates the mipmap level used .
+// If you need to sample a texture in the vertex shader, use the LOD version
+// to specify a mipmap (e.g. 0 for full resolution) :
+float4 color = SAMPLE_TEXTURE2D_LOD(textureName, sampler_textureName, uv, 0);
+```
+
+Some other texture types include : Texture2DArray , Texture3D , TextureCube (known as a Cubemap outside of the shader) & TextureCubeArray , each using the following macros :
+
+```shader
+// Texture2DArray
+TEXTURE2D_ARRAY(textureName);
+SAMPLER(sampler_textureName);
+// ...
+float4 color = SAMPLE_TEXTURE2D_ARRAY(textureName, sampler_textureName, uv, index);
+float4 color = SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, sampler_textureName, uv, lod);
+
+// Texture3D
+TEXTURE3D(textureName);
+SAMPLER(sampler_textureName);
+// ...
+float4 color = SAMPLE_TEXTURE3D(textureName, sampler_textureName, uvw);
+float4 color = SAMPLE_TEXTURE3D_LOD(textureName, sampler_textureName, uvw, lod);
+// uses 3D uv coord (commonly referred to as uvw)
+
+// TextureCube
+TEXTURECUBE(textureName);
+SAMPLER(sampler_textureName);
+// ...
+float4 color = SAMPLE_TEXTURECUBE(textureName, sampler_textureName, dir);
+float4 color = SAMPLE_TEXTURECUBE_LOD(textureName, sampler_textureName, dir, lod);
+// uses 3D uv coord (named dir here, as it is typically a direction)
+
+// TextureCubeArray
+TEXTURECUBE_ARRAY(textureName);
+SAMPLER(sampler_textureName);
+// ...
+float4 color = SAMPLE_TEXTURECUBE_ARRAY(textureName, sampler_textureName, dir, index);
+float4 color = SAMPLE_TEXTURECUBE_ARRAY_LOD(textureName, sampler_textureName, dir, lod);
+```
+
