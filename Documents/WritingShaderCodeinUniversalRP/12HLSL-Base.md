@@ -4,13 +4,13 @@ Shader code is written using the High Level Shading Language (HLSL) in Unity .
 
 ## HLSLPROGRAM & HLSLINCLUDE
 
-Inside each ShaderLab Pass , we define blocks for HLSL code using HLSLPROGRAM and ENDHLSL tags . Each of these blocks must include a Vertex and Fragment shader . We use the `#pragma vertex/fragment` to set which function is going to be used .
+Inside each ShaderLab Pass , we define blocks for HLSL code using HLSLPROGRAM and ENDHLSL tags . Each of these blocks must include a Vertex and Fragment shader . We use the *`#pragma vertex/fragment`* to set which function is going to be used .
 
 For built-in pipeline shaders "vert" and "frag" are the most common names , but they can be anythings. For URP , it tends to use functions like "UnlitPassVertex" and "UnlitPassFragment" which is a bit more descriptive of what the shader pass is doing .
 
 Inside the SubShader we can also use HLSLINCLUDE to include the code **in every Pass inside that SubShader** . This is very useful for writing shaders in URP as every pass needs to use the same `UnityPerMaterial CBUFFER` to have compatibility with the SRP Batcher and this helps us reuse the same code for every pass instead of needing to define it separately . We could alternatively use a separate include file instead too .
 
-```shader
+```hlsl
 SubShader
 {
     Tags {"RenderPipeline"="UniversalPipeline" "Queue"="Geometry"}
@@ -34,7 +34,7 @@ SubShader
 }
 ```
 
-We'll discuss the contents of these code block later . For now , we need to go over some basics of HLSL which is impottant to know to be able to understand the later sections .
+We'll discuss the contents of these code block later . For now , we need to go over some basics of HLSL which is important to know to be able to understand the later sections .
 
 ## Variables
 
@@ -69,7 +69,7 @@ In order to get one of the components of a vector , we can use .x , .y , .z , or
 
 We can even take this further and return a vector with components rearranged , which is referred to as swizzling . Here is a few examples :
 
-```shader
+```hlsl
 float3 vector = float3(1, 2, 3);
 
 float3 a = vector.xyz; // or .rgb,  a = (1, 2, 3)
@@ -86,28 +86,28 @@ float f = vector.y; // or .g,  f = 2
 
 A matrix is created by appending two sizes (integers between 1 and 4) to the scalar , separated by an "x" . The first integer is the number of **rows** , while the second is the number of **columns** in the matrix . For example :
 
-- `float4x4` - 4 rows , 4 columns
-- `int4x3` - 4 rows , 3 columns
-- `half2*1` - 2 rows , 1 column
-- `float1x4` - 1 row , 4 columns
+- *`float4x4`* - 4 rows , 4 columns
+- *`int4x3`* - 4 rows , 3 columns
+- *`half2*1`* - 2 rows , 1 column
+- *`float1x4`* - 1 row , 4 columns
 
-Matrix are used for transforming between different spaces . If you aren't very familiar with them , I'd recommend looking at [this tutorial by CatlikeCoding](https://catlikecoding.com/unity/tutorials/rendering/part-1/) .
+Matrix are used for transforming between different spaces . If you aren't very familiar with them , I'd recommend looking at [<u>this tutorial by CatlikeCoding</u>](https://catlikecoding.com/unity/tutorials/rendering/part-1/) .
 
 Unity has built-in transformation matrices which are used for transforming between common spaces , such as :
 
-- `UNITY_MATRIX_M` (or `unity_ObjectToWorld`) - **Model** Matrix , Converts from Object space to World space .
-- `UNITY_MATRIX_V` - **View** Matrix , Converts from world space to View space
-- `UNITY_MATRIX_P` - **Projection** Matrix , Converts from View space to Clip space
-- `UNITY_MATRIX_VP` - **View Projection** Matrix , Converts from World space to Clip space .
+- *`UNITY_MATRIX_M`* (or *`unity_ObjectToWorld`*) - **Model** Matrix , Converts from Object space to World space .
+- *`UNITY_MATRIX_V`* - **View** Matrix , Converts from world space to View space
+- *`UNITY_MATRIX_P`* - **Projection** Matrix , Converts from View space to Clip space
+- *`UNITY_MATRIX_VP`* - **View Projection** Matrix , Converts from World space to Clip space .
 
 Also inverse versions :
 
-- `UNITY_MATRIX_I_M` (or `unity_WorldToObject`) - **Inverse Model** Matrix , Converts from World space to Object space
-- `UNITY_MATRIX_I_V` - **Inverse View** Matrix , Converts from View space to World space
-- `UNITY_MATRIX_I_P` - **Inverse Projection** Matrix , Converts from Clip space to View space
-- `UNITY_MATRIX_I_VP` - **Inverse View Projection** Matrix , Converts from Clip space to World space
+- *`UNITY_MATRIX_I_M`* (or *`unity_WorldToObject`*) - **Inverse Model** Matrix , Converts from World space to Object space
+- *`UNITY_MATRIX_I_V`* - **Inverse View** Matrix , Converts from View space to World space
+- *`UNITY_MATRIX_I_P`* - **Inverse Projection** Matrix , Converts from Clip space to View space
+- *`UNITY_MATRIX_I_VP`* - **Inverse View Projection** Matrix , Converts from Clip space to World space
 
-While you can use these matrices to convert between spaces via matrix multiplication (e.g. `mul(matrix, float4(position.xyz, 1))`) , there is also helper function in the SRP Core ShaderLibrary [SpaceTransforms.hlsl](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl) .
+While you can use these matrices to convert between spaces via matrix multiplication (e.g. *`mul(matrix, float4(position.xyz, 1))`*) , there is also helper function in the SRP Core ShaderLibrary [<u>SpaceTransforms.hlsl</u>](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl) .
 
 Something to be aware of is when dealing with matrix multiplication , the order is important . Usually the matrix will be in the first input and the vector in the second . A Vector in the second input is treated like a Matrix consisting of up to 4 rows (depending on the size of the vector) , and a single column . A Vector in the first input is instead treated as a Matrix consisting of 1 row and up to 4 columns .
 
@@ -132,9 +132,9 @@ The zero-based array access notation:
 - [2][0], [2][1], [2][2], [2][3]
 - [3][0], [3][1], [3][2], [3][3]
 
-With the first two options , you can also use swizzling . e.g. `._m00_m11` or `._11_22` .
+With the first two options , you can also use swizzling . e.g. *`._m00_m11`* or *`._11_22`* .
 
-Of note , `._m03_m13_m23` corresponds to the translation part of each matrix . So `UNITY_MATRIX_M._m03_m13_m23` gives you the World space postion of the origin of the GameObject , (assuming there is no static/dynamic batching involved for reasons explained in my [Intro to Shaders post](https://www.cyanilux.com/tutorials/intro-to-shaders/#material-instances) .
+Of note , *`._m03_m13_m23`* corresponds to the translation part of each matrix . So *`UNITY_MATRIX_M._m03_m13_m23`* gives you the World space postion of the origin of the GameObject , (assuming there is no static/dynamic batching involved for reasons explained in my [<u>Intro to Shaders post</u>](https://www.cyanilux.com/tutorials/intro-to-shaders/#material-instances) .
 
 ### Texture Objects
 
@@ -144,12 +144,12 @@ The fragment shader stage runs on a per-fragment/pixel basis , where we can acce
 
 The most common texture is a 2D one , which can be defined in URP using the following macros in the global scope (outside any functions) :
 
-```shader
+```hlsl
 TEXTURE2D(textureName);
 SAMPLE(sampler_textureName);
 ```
 
-For each texture object we also define a [SampleState](https://docs.unity3d.com/Manual/SL-SamplerStates.html) which contains the wrap and filter modes from the texture's import settings . Alternatively , we can define an inline sampler , e.g. `SAMPLER(sampler_linear_repeat)` .
+For each texture object we also define a [<u>SampleState</u>](https://docs.unity3d.com/Manual/SL-SamplerStates.html) which contains the wrap and filter modes from the texture's import settings . Alternatively , we can define an inline sampler , e.g. *`SAMPLER(sampler_linear_repeat)`* .
 
 #### Filter Modes
 
@@ -166,7 +166,7 @@ For each texture object we also define a [SampleState](https://docs.unity3d.com/
 
 Later in the fragment shader we use another macro to sample the Texture2D with a uv coordinate that would also be passed through from the vertex shader :
 
-```shader
+```hlsl
 float4 color = SAMPLE_TEXTURE2D(textureName, sampler_textureName, uv);
 // Note, this can only be used in fragment as it calculates the mipmap level used .
 // If you need to sample a texture in the vertex shader, use the LOD version
@@ -176,7 +176,7 @@ float4 color = SAMPLE_TEXTURE2D_LOD(textureName, sampler_textureName, uv, 0);
 
 Some other texture types include : Texture2DArray , Texture3D , TextureCube (known as a Cubemap outside of the shader) & TextureCubeArray , each using the following macros :
 
-```shader
+```hlsl
 // Texture2DArray
 TEXTURE2D_ARRAY(textureName);
 SAMPLER(sampler_textureName);
@@ -238,11 +238,11 @@ Note that these SetXArray methods are also limited to a maximum array size of 10
 
 ### Buffer
 
-An alternative to arrays , is using [Compute Buffers](https://docs.unity3d.com/ScriptReference/ComputeBuffer.html) , which in HLSL is referred to as a **StructuredBuffer** (which is read-only . Alternatively there's **RWStructuredBuffer** for reading&writing but is only supported in pixel/fragment and compute shaders) .
+An alternative to arrays , is using [<u>Compute Buffers</u>](https://docs.unity3d.com/ScriptReference/ComputeBuffer.html) , which in HLSL is referred to as a **StructuredBuffer** (which is read-only . Alternatively there's **RWStructuredBuffer** for reading&writing but is only supported in pixel/fragment and compute shaders) .
 
 You'd also need at lease `#pragma target 4.5` to use these . Not all platforms will support compute buffers too (and some might not support StructuredBuffer in vertex shaders) . You can use `SystemInfo.supportsComputeShaders` in C# at runtime to check if the platform supports them .
 
-```shader
+```hlsl
 struct Example
 {
     float3 A;
@@ -307,7 +307,7 @@ I'm not super familiar with StructuredBuffers so sorry if this section is a bit 
 
 Declaring functions in HLSL is fairly similar to C# , however it is important to note that you can only call a function if it's already been declared . You cannot call a function before declaring it so the order of functions and `#include` files matters !
 
-```shader
+```hlsl
 float3 example(float3 a, float3 b)
 {
     return a * b;
@@ -316,7 +316,7 @@ float3 example(float3 a, float3 b)
 
 Here float3 is the return type , "example" is the function name and inside the brackets are the parameters passed into the function . In the case of no return type , `void` is used . You can also specify output parameters using `out` before the parameter type , or `input` if you want it to be an input that you can edit and pass back out . (There's also in but we don't need to write it) .
 
-```shader
+```hlsl
 void example(float3 a, float3 b, out float3 Out)
 {
     Out = a * b;
@@ -328,13 +328,13 @@ You may also see `inline` before the function return type . This is the default 
 
 You may also see functions like :
 
-```shader
+```hlsl
 #define EXAMPLE(x, y) ((x) * (y))
 ```
 
 This is referred to as a [macro](https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-appendix-pre-define-2) . Macros are handled before compiling the shader and they get replaced with the definition , with any parameters substituted . For example :
 
-```shader
+```hlsl
 float f = EXAMPLE(3, 5);
 float3 a = float3(1, 1, 1);
 float3 f2 = EXAMPLE(a, float3(0, 1, 0));
@@ -356,7 +356,7 @@ float b = (1 + 2 * 3 + 4)
 
 Another macro example is :
 
-```shader
+```hlsl
 #define TRANSFORM_TEX(tex, name) (tex.xy * name##_ST.xy + name##_ST.zw)
 
 // Usage :
@@ -376,7 +376,7 @@ The CBUFFER must include all of the **exposed** properties (same as in the Shade
 
 It cannot include other variables that aren't exposed .
 
-```shader
+```hlsl
 HLSLINCLUDE
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
@@ -406,7 +406,7 @@ Since this is a fairly simple Unlit shader our Attributes and Varyings won't be 
 
 #### Attributes (VertexInput)
 
-```shader
+```hlsl
 struct Attributes
 {
     float4 positionOS : POSITION;
@@ -427,7 +427,7 @@ The **Attributes** struct will be the input to the vertex shader . It allows us 
 
 #### Varyings(FragmentInput)
 
-```shader
+```hlsl
 struct Varyings
 {
     float4 positionCS : SV_POSITION;
@@ -448,7 +448,7 @@ Depending on the compile target (e.g. `#pragma target 3.0`) there can also be ad
 
 The fragment shader can also provide an output struct . However it's ususlly not needed as it typically only uses a single output semantic , `SV_Target` , which is used to write the fragment/pixel colour to the current render target . In this case we can just define it with the function like :
 
-```shader
+```hlsl
 half4 UnlitPassFragment(Varyings input) : SV_Target
 {
     // ... // calculate color
@@ -463,7 +463,7 @@ If not using the deferred path , using MRT would require setup on the C# side , 
 
 In the shader we would define the MRT output like so :
 
-```shader
+```hlsl
 struct FragOut
 {
     half4 color : SV_Target0; // aka SV_Target
