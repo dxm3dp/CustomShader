@@ -419,11 +419,11 @@ struct Attributes
 
 The **Attributes** struct will be the input to the vertex shader . It allows us to obtain the per-vertex data from the mesh , using the strings (most of which are all in caps) which are known as [semantics](https://docs.microsoft.com/en-gb/windows/win32/direct3dhlsl/dx-graphics-hlsl-semantics) . This includes :
 
-- POSITION : Vertex position
-- COLOR : Vertex colour
-- TEXCOORD0-7 : UVs (aka texture coordinates) . A mesh has 8 different UV channels accessed with a value from 0 to 7 . Note that in C# , Mesh.uv corresponds to `TEXCOORD0` . Mesh.uv1 does not exist , the next channel is uv2 which corresponds to `TEXCOORD1` and so on up to Mesh.uv8 and `TEXCOORD7` .
-- NORMAL : Vertex Normals (used for lighting calculations . This is unlit currently so isn't needed)
-- TANGENT : Vertex Tangents (used to define "tangent space" , important for normal maps and parallax effects)
+- *`POSITION`* : Vertex position
+- *`COLOR`* : Vertex colour
+- *`TEXCOORD0-7`* : UVs (aka texture coordinates) . A mesh has 8 different UV channels accessed with a value from 0 to 7 . Note that in C# , Mesh.uv corresponds to *`TEXCOORD0`* . Mesh.uv1 does not exist , the next channel is uv2 which corresponds to *`TEXCOORD1`* and so on up to Mesh.uv8 and *`TEXCOORD7`* .
+- *`NORMAL`* : Vertex Normals (used for lighting calculations . This is unlit currently so isn't needed)
+- *`TANGENT`* : Vertex Tangents (used to define "tangent space" , important for normal maps and parallax effects)
 
 #### Varyings(FragmentInput)
 
@@ -438,28 +438,29 @@ struct Varyings
 
 The **Varyings** struct will be the input to the fragment shader , and the output of the vertex shader (assuming there's no geometry shader in-between , which might need another struct , but we aren't going though that in this post) .
 
-Unlike the previous struct , we use `SV_POSITION` instead of `POSITION` , which stores the **clip space position** from the vertex shader output . It's important to convert the geometry to fragments/pixels on the screen at the correct location .
+Unlike the previous struct , we use *`SV_POSITION`* instead of *`POSITION`* , which stores the **clip space position** from the vertex shader output . It's important to convert the geometry to fragments/pixels on the screen at the correct location .
 
-We also use the `COLOR` and/or `TEXCOORD0-7` semantics but unlike before don't have to correspond to the mesh vertex colors / uvs at all . Instead they are used to interpolate data across the triangle . `NORMAL/TANGENT` is typically not used in the Varyings struct , and although I have seen them still work (along with completely custom semantics) , I assume the compiler is converting them but that behaviour might not supported on all platforms so I'd stick to TEXCOORD to be safe .
+We also use the *`COLOR`* and/or *`TEXCOORD0-7`* semantics but unlike before don't have to correspond to the mesh vertex colors / uvs at all . Instead they are used to interpolate data across the triangle . *`NORMAL/TANGENT`* is typically not used in the Varyings struct , and although I have seen them still work (along with completely custom semantics) , I assume the compiler is converting them but that behaviour might not supported on all platforms so I'd stick to TEXCOORD to be safe .
 
-Depending on the compile target (e.g. `#pragma target 3.0`) there can also be additional TEXCOORD interpolators that can be used . Shader Model 2 supports up to 8 of these interpolators (and two COLOR semantics , probably COLOR/COLOR0 and COLORE1 though I've never used that) . Shader Model 3 combined these so supports up to 10 (so just TEXCOORD0-9 , or COLOR & TEXCOORD0-8) . More interpolators might also be available in other targets but also might not be supported on all platforms . See the [Shader Compile Targets docs page](https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html) for more info.
+Depending on the compile target (e.g. *`#pragma target 3.0`*) there can also be additional TEXCOORD interpolators that can be used . Shader Model 2 supports up to 8 of these interpolators (and two COLOR semantics , probably COLOR/COLOR0 and COLOR1 though I've never used that) . Shader Model 3 combined these so supports up to 10 (so just TEXCOORD0-9 , or COLOR & TEXCOORD0-8) . More interpolators might also be available in other targets but also might not be supported on all platforms . See the [<u>Shader Compile Targets docs page</u>](https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html) for more info.
 
 #### FragmentOutput
 
-The fragment shader can also provide an output struct . However it's ususlly not needed as it typically only uses a single output semantic , `SV_Target` , which is used to write the fragment/pixel colour to the current render target . In this case we can just define it with the function like :
+The fragment shader can also provide an output struct . However it's usually not needed as it typically only uses a single output semantic , *`SV_Target`* , which is used to write the fragment/pixel colour to the current render target . In this case we can just define it with the function like :
 
 ```hlsl
 half4 UnlitPassFragment(Varyings input) : SV_Target
 {
-    // ... // calculate color
+    // calculate color
+    // ... 
 
     return color;
 }
 ```
 
-It is possible for a shader to output to more than one render target though , known as **Multi Render Target** (MRT) . This is used by the Deferred Rendering path , e.g. [see UnityGBuffer.hlsl](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl) (which isn't fully supported in URP yet) .
+It is possible for a shader to output to more than one render target though , known as **Multi Render Target** (MRT) . This is used by the Deferred Rendering path , e.g. [<u>see UnityGBuffer.hlsl</u>](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl) (which isn't fully supported in URP yet) .
 
-If not using the deferred path , using MRT would require setup on the C# side , such as using `Graphics.SetRenderTarget` with a `RenderBuffer[]` array , or `CommandBuffer.SetRenderTarget` with a `RenderTargetIdentifier[]` array . MRT is not supported on all platforms however (e.g. GLES2)
+If not using the deferred path , using MRT would require setup on the C# side , such as using *`Graphics.SetRenderTarget`* with a *`RenderBuffer[]`* array , or *`CommandBuffer.SetRenderTarget`* with a *`RenderTargetIdentifier[]`* array . MRT is not supported on all platforms however (e.g. GLES2)
 
 In the shader we would define the MRT output like so :
 
@@ -472,7 +473,9 @@ struct FragOut
 
 FragOut UnlitPassFragment(Varyings input)
 {
-    // ... // calculate color and color2
+    // calculate color and color2
+    // ... 
+
     FragOut output;
     output.color = color;
     output.color2 = color2;
@@ -480,4 +483,4 @@ FragOut UnlitPassFragment(Varyings input)
 }
 ```
 
-It is also possible to change the value used for depth , usin the `SV_Depth` semantic (or `SV_DepthGreaterEqual/SV_DepthLessEqual`) as explained in my [Depth article](https://www.cyanilux.com/tutorials/depth/#depth-output).
+It is also possible to change the value used for depth , using the *`SV_Depth`* semantic (or *`SV_DepthGreaterEqual/SV_DepthLessEqual`*) as explained in my [<u>Depth article</u>](https://www.cyanilux.com/tutorials/depth/#depth-output).
