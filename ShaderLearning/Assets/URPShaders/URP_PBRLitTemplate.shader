@@ -335,5 +335,126 @@
 			*/
             ENDHLSL
         }
+
+        // DepthNormals, used for SSAO & other custom renderer features that request it
+        Pass
+        {
+            Name "DepthNormals"
+            Tags {"LightMode"="DepthNormals"}
+
+            ZWrite On
+            ZTest LEqual
+
+            HLSLPROGRAM
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+
+            // Meterial Keywords
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
+
+            // Note if we do any vertex displacement, we'll need to change the vertex function. e.g. :
+			/*
+			#pragma vertex DisplacedDepthNormalsVertex (instead of DepthNormalsVertex above)
+			Varyings DisplacedDepthNormalsVertex(Attributes input) 
+            {
+				Varyings output = (Varyings)0;
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				
+				// Example Displacement
+				input.positionOS += float4(0, _SinTime.y, 0, 0);
+				
+				output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+				output.positionCS = TransformObjectToHClip(input.position.xyz);
+				VertexNormalInputs normalInput = GetVertexNormalInputs(input.normal, input.tangentOS);
+				output.normalWS = NormalizeNormalPerVertex(normalInput.normalWS);
+				return output;
+			}
+			*/
+            ENDHLSL
+        }
+
+        // Meta, used for baking global illumination / lightmaps
+        Pass
+        {
+            Name "Meta"
+            Tags {"LightMode"="Meta"}
+
+            Cull Off
+
+            HLSLPROGRAM
+            #pragma vertex UniversalVertexMeta
+            #pragma fragment UniversalFragmentMeta
+
+            #pragma shader_feature_local_fragment _SPECULAR_SETUP
+			#pragma shader_feature_local_fragment _EMISSION
+			#pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
+			#pragma shader_feature_local_fragment _ALPHATEST_ON
+			#pragma shader_feature_local_fragment _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+			//#pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+
+            #pragma shader_feature_local_fragment _SPECGLOSSMAP
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+                float2 uv0 : TEXCOORD0; 
+                float2 uv1 : TEXCOORD1;
+                float2 uv2 : TEXCOORD2;
+                #ifdef _TANGENT_TO_WORLD
+                    float4 tangentOS : TANGENT;
+                #endif
+                float4 color : COLOR;
+            };
+
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 color : COLOR;
+            }
+
+            #include "PBRSurface.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaInput.hlsl"
+
+            Varyings UniversalVertexMeta(Attributes input)
+            {
+                Varyings output;
+                output.positionCS = MetaVertexPosition(input.positionOS, input.uv1, input.uv2, unity_LightmapST, unity_DynamicLightmapST);
+                output.uv = TRANSFORM_TEX(input.uv0, _BaseMap);
+                output.color = input.color;
+
+                return output;
+            }
+
+            half4 UniversalFragmentMeta(Varyings input) : SV_Target
+            {
+                SurfaceData surfaceData;
+                InitializeSurfaceData(input, surfaceData);
+
+                BRDFData BRDFData;
+                InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
+
+                MetaInput metaInput;
+                metaInput.Albedo = brdfData.diffuse + brdfData.specular * brdfData.roughness * 0.5;
+                metaInput.SpecularColor = surfaceData.specular;
+                metaInput.Emission = surfaceData.emission;
+
+                return MetaFragment(metaInput);
+            }
+
+            ENDHLSL
+        }
     }
 }
