@@ -63,3 +63,23 @@ Update Mode: updateDependencies
 
 The following packages were updated:
   com.unity.ide.vscode from version 1.1.4 to 1.2.1
+
+=== Wed Feb  2 20:55:02 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ide.vscode from version 1.2.1 to 1.2.3
+
+=== Wed Feb  9 11:35:16 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were added:
+  com.unity.ide.visualstudio@2.0.12
+The following packages were updated:
+  com.unity.ide.vscode from version 1.2.3 to 1.2.4
+  com.unity.render-pipelines.universal from version 7.5.3 to 10.8.1
+  com.unity.timeline from version 1.2.6 to 1.4.8
