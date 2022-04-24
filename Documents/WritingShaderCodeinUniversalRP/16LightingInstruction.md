@@ -159,13 +159,13 @@ half4 LitPassFragment(Varyings IN) : SV_Target
 
 It's also not too important that the functions are void as far as I'm aware . We could instead return the struct itself . I kinda prefer it that way , but I thought I'd try keeping it more consistent with how the URP/Lit shader code looks .
 
-If you want to organise thins further , we could also move all the functions to **separate.hlsl** files and use a *`#include`* for it . This would also allow you to reuse that code for multiple shaders , and the Meta pass if you need to support that (discussed in more detail in a later section) . At the very least , I'd recommend having a hlsl file containing *`InitializeSurfaceData`* and it's required fcuntions / texture definitions .
+If you want to organise things further , we could also move all the functions to **separate.hlsl** files and use a *`#include`* for it . This would also allow you to reuse that code for multiple shaders , and the Meta pass if you need to support that (discussed in more detail in a later section) . At the very least , I'd recommend having a hlsl file containing *`InitializeSurfaceData`* and it's required functions / texture definitions .
 
 ## InitializeInputData
 
 As mentioned previously , our *`InitializeInputData`* function needs to set each of the variables inside the InputData struct , but this mainly obtaining the data passed through from the vertex stage and using some macros and functions (e.g. in order to handle transformations between spaces) .
 
-This struct can also be the same for all lighting models , though I'm sure you could leave some parts out , e.g. if you aren't supporting baked lighting or the shadowMask . It is important to note that everything in the InputData struct needs to be initialised , so the first line in the function sets everything to 0 initally to avoid errors . You'll need to be careful then to not miss anything important though . It also helps prevent the shader breaking if an extra variable is added to the struct in future updates to the ShaderLibrary .
+This struct can also be the same for all lighting models , though I'm sure you could leave some parts out , e.g. if you aren't supporting baked lighting or the shadowMask . It is important to note that everything in the InputData struct needs to be initialised , so the first line in the function sets everything to 0 initially to avoid errors . You'll need to be careful then to not miss anything important though . It also helps prevent the shader breaking if an extra variable is added to the struct in future updates to the ShaderLibrary .
 
 ```hlsl
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"

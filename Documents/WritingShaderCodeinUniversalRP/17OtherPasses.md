@@ -44,3 +44,7 @@ Pass
     ENDHLSL
 }
 ```
+
+The URP/Lit shader usually includes LitInput.hlsl , however this defines many textures that our shader might not use (which would likely be ignored/compiled out anyway) and it also includes a *`UnityPerMaterial CBUFFER`* which we've already defined in our *`HLSLINCLUDE`* . This causes redefinition errors so I'm instead including a few of the ShaderLibrary files that was included by LitInput.hlsl to make sure the pass still functions without erroring .
+
+CommonMaterial.hlsl is mainly included because of the LerpWhiteTo function is used by Shadows.hlsl when sampling the shadowmap . SurfaceInput.hlsl is included as ShadowCasterPass.hlsl makes use of the *`_BaseMap`* and *`SampleAlbedoAlpha`* function for the alpha clipping/cutout support .
