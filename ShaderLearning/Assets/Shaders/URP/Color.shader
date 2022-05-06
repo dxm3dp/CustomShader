@@ -44,7 +44,7 @@ Shader "Custom/URP/Base/Color"
             }
 
             // 片段着色方法
-            half4 frag(Varyings IN) : SV_TARGET
+            half4 frag(Varyings IN) : SV_Target
             {
                 return _BaseColor;
             }
