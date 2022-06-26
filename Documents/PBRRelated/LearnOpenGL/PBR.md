@@ -73,4 +73,38 @@ The reflectance equation appears daunting at first, but as we'll dissect it you'
 
 ![radiant](./Images/06.png)
 
-The radiant flux measures the total area of this function of different wavelengths. 
+The radiant flux measures the total area of this function of different wavelengths. Directly taking this measure of wavelengths as input is slightly impractical so we often make the simplification of representing radiant flux, not as a function of varying wavelength strengths, but as a light color triplet encoded as RGB (or as we'd commonly call it: light color). This encoding does come at quite a loss of information, but this is generally negligible for visual aspects.
+
+**Solid angle**: the solid angle,denoted as $\omega$, tells us the size of area of a shape projected onto a unit sphere. The area of the projected shape onto this unit sphere is known as the **solid angle**; you can visualize the solid angle as a direction with volume:
+
+![solid angle](./Images/07.png)
+
+Think of being an observer at the center of this unit sphere and looking in the direction of the shape; the size of the silhouette you make out of it is the solid angle.
+
+**Radiant intensity**: radiant intensity measures the amount of radiant flux per solid angle, or the strength of a light source over a projected area onto the unit sphere. For instance, given an omnidirectional light that radiates equally in all directions, the radiant intensity can give us its energy over a specific area (solid angle):
+
+![radiant intensity](./Images/08.png)
+
+The equation to describe the radiant intensity is defined as follows:
+
+$$
+I = \frac{d\Phi}{d\omega}
+$$
+
+Where $I$ is the radiant flux $\Phi$ over the solid angle $\omega$.
+
+With knowledge of radiant flux, radiant intensity, and the solid angle, we can finally describe the equation for **radiance**. Radiance is described as the total observed energy in an area **A** over the solid angle $\omega$ of a light of radiant intensity $\Phi$:
+
+$$
+L = \frac{d^2\Phi}{dAd\omega\cos\theta}
+$$
+
+![radiant](./Images/09.png)
+
+Radiance is a radiometric measure of the amount of light in an area, scaled by the **incident** (or incoming) angle $\theta$ of the light to the surface's normal as $\cos\theta$: light is weaker the less it directly radiates onto the surface, and strongest when it is directly perpendicular to the surface. This is similar to our perception of diffuse lighting from the basic lighting chapter as $\cos\theta$ directly corresponds to the dot product between the light's direction vector and the surface normal:
+
+```hlsl
+float cosTheta = dot(lightDir, N);
+```
+
+The radiance equation is quite useful as it contains most physical quantities we're interested in.
